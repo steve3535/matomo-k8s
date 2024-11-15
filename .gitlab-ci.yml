@@ -16,10 +16,11 @@ before_script:
         namespace: matomo 
       data:
           mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
-          mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)  
+          mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
+      EOF   
 validate:
     stage: validate
     script:
-    - echo "Validate DB scripts"
+      - echo "Validate DB scripts"
     tags:
-        - k8s
+      - k8s

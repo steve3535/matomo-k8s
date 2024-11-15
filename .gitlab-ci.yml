@@ -18,7 +18,6 @@ before_script:
           mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
-    - kubectl config set-context --namespace matomo --current
 
 validate-db-scripts:
   stage: validate 
@@ -36,6 +35,7 @@ validate-db-service:
     stage: validate
     script:
       - echo "Validating DB connection ..."
+      - kubectl config set-context --namespace matomo --current      
       - |
         if kubectl run mysql-client-${CI_JOB_ID} -i --image=mysql --rm -- \
         mysql -hdb-matomo.matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1";then 
@@ -43,7 +43,7 @@ validate-db-service:
         exit 0
         fi 
         echo "DB connection failed"
-        exit 1
+        exit 1          
         
     tags:
       - k8s

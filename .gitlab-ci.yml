@@ -1,0 +1,23 @@
+variables:
+    MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+
+stages:
+    - validate
+    - deploy
+
+before_script:
+    - |
+      cat <<EOF >manifests/db/0-db-matomo-secrets.yaml 
+      apiVersion: v1
+      kind: Secret
+      metadata:  
+        name: db-matomo-secrets
+        namespace: matomo 
+      data:
+          mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
+          mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)  
+validate:
+    stage: validate
+    script:
+    - echo "Validate DB scripts"

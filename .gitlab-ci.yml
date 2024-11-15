@@ -2,6 +2,10 @@ variables:
     MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
 
+default:
+  tags: 
+    - k8s
+
 stages:
     - validate
     - deploy
@@ -23,14 +27,12 @@ validate-db-scripts:
   stage: validate 
   script:
     - kubectl apply -f manifests/db/ --dry-run=client   
-  tags:
-    - k8s 
+
 validate-deployment:
   stage: validate 
   script:
     - kubectl rollout status deployment db-matomo 
-  tags:
-    - k8s 
+
 validate-db-service:
     stage: validate
     script:
@@ -44,6 +46,3 @@ validate-db-service:
         fi 
         echo "DB connection failed"
         exit 1          
-        
-    tags:
-      - k8s

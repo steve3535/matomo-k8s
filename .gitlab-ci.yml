@@ -7,8 +7,9 @@ default:
     - k8s
 
 stages:
-    - validate
+    - validate-db-conf
     - deploy
+    - validate-db
 
 before_script:
     - |
@@ -23,8 +24,8 @@ before_script:
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
 
-validate-db-scripts:
-  stage: validate 
+validate-db-conf:
+  stage: validate-db-conf 
   script:
     - kubectl apply -f manifests/db/ --dry-run=client   
 
@@ -39,13 +40,15 @@ deploy-db:
     - kubectl wait --for=condition=available deployment/db-matomo -n matomo 
     - kubectl apply -f manifests/db/3-db-matomo-svc.yaml  
 
-validate-deployment:
-  stage: validate 
+validate-db-deployment:
+  stage: validate-db
   script:
     - kubectl rollout status deployment db-matomo --timeout=5s
 
 validate-db-service:
-    stage: validate
+    stage: validate-db
+    needs:
+      - validate-db-deployment 
     script:
       - echo "Validating DB connection ..."
       - kubectl config set-context --namespace matomo --current      

@@ -38,11 +38,12 @@ validate-db-service:
       - echo "Validating DB connection ..."
       - |
         if kubectl run mysql-client-${CI_JOB_ID} -i --image=mysql --rm -- \
-        mysql -hdb-matomo.matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1"; then \
-        echo "DB connection successful" \
-        exit 0 \
-        else echo "DB connection failed" \
-        exit 1 \
-        fi
+        mysql -hdb-matomo.matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1";then 
+        echo "DB connection successful" 
+        exit 0
+        fi 
+        echo "DB connection failed"
+        exit 1
+        
     tags:
       - k8s

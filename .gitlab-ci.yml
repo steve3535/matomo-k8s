@@ -21,3 +21,5 @@ validate:
     stage: validate
     script:
     - echo "Validate DB scripts"
+    tags:
+        - k8s

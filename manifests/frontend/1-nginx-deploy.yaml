@@ -1,0 +1,38 @@
+# nginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: matomo
+  labels:
+    app: nginx-matomo
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-matomo
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: nginx-matomo
+        tier: frontend
+    spec:
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        ports:
+          - containerPort: 80
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d/
+          - name: matomo-html-data
+            mountPath: /var/www/html 
+      volumes:
+        - name: matomo-html-data
+          persistentVolumeClaim:
+            claimName: pvc-matomo-html-data
+        - name: nginx-config
+          configMap:
+            name: nginx-matomo-config

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: php-matomo
+    tier: backend
+  name: php-matomo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-matomo
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php-matomo
+        tier: backend
+    spec:
+      containers:
+      - image: matomo:fpm-alpine
+        name: php-matomo
+        ports:
+          - containerPort: 9000
+        volumeMounts:
+          - name: matomo-php-logs
+            mountPath: /var/log/php
+          - name: matomo-html-data
+            mountPath: /var/www/html
+        env:
+          - name: MATOMO_DATABASE_HOST
+            value: db-matomo.matomo.svc.cluster.local
+
+      volumes:
+        - name: matomo-html-data
+          persistentVolumeClaim:
+            claimName: pvc-matomo-html-data
+
+        - name: matomo-php-logs
+          persistentVolumeClaim:
+            claimName: pvc-matomo-php-logs
+
+

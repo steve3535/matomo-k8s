@@ -39,8 +39,8 @@ validate-db-service:
       - echo "Validating DB connection ..."
       - kubectl config set-context --namespace matomo --current      
       - |
-        if kubectl run mysql-client-${CI_JOB_ID} -i --image=mysql --rm -- \
-        mysql -hdb-matomo.matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1";then 
+        if kubectl run mariadb-client-${CI_JOB_ID} -i --image=bitnami/mariadb --rm --restart=Never -- \
+        mysql -hdb-matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1";then 
         echo "DB connection successful" 
         exit 0
         fi 

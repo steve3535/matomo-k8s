@@ -35,7 +35,6 @@ deploy-db:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 
     - kubectl apply -f manifests/db/1-db-matomo-pvc.yaml
-    - kubectl wait --for=condition=bound pvc/db-matomo-pvc -n matomo 
     - kubectl apply -f manifests/db/2-db-matomo.yaml 
     - kubectl wait --for=condition=available deployment/db-matomo -n matomo 
     - kubectl apply -f manifests/db/3-db-matomo-svc.yaml  

@@ -8,8 +8,11 @@ default:
 
 stages:
     - validate-db-conf
-    - deploy
+    - deploy-db
     - validate-db
+    - validate-php-conf 
+    - deploy-php
+    - validate-php 
 
 before_script:
     - |
@@ -30,7 +33,7 @@ validate-db-conf:
     - kubectl apply -f manifests/db/ --dry-run=client   
 
 deploy-db:
-  stage: deploy 
+  stage: deploy-db
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 
@@ -60,3 +63,24 @@ validate-db-service:
         fi 
         echo "DB connection failed"
         exit 1          
+
+validate-php-conf:
+  stage: validate-php-conf 
+  script:
+    - kubectl apply -f manifests/backend/ --dry-run=client   
+
+deploy-php:
+  stage: deploy-php 
+  script:
+    - kubectl apply -f manifests/backend/1-php-pvc.yaml 
+    - kubectl apply -f manifests/backend/2-php-deploy.yaml
+      
+validate-php-deployment:
+  stage: validate-php 
+  script:
+    - kubectl rollout status deployment/php-matomo --timeout=5s 
+
+validate-php-service:
+  stage: validate-php 
+  script:
+    - echo "to be implemented ..."

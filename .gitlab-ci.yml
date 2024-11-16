@@ -83,4 +83,14 @@ validate-php-deployment:
 validate-php-service:
   stage: validate-php 
   script:
-    - echo "to be implemented ..."
+    - kubectl config set-context --namespace matomo --current      
+    - |
+      if kubectl run php-test-${CI_JOB_ID} --image=alpine -it --rm --restart=Never -- \
+      sh -c apk update --no-check-certificate && apk add --no-cache fcgi --no-check-certificate && \
+      cgi-fcgi -bind -connect php-matomo:9000;then 
+      echo "PHP backend connection OK"
+      fi 
+      exit 0
+      echo "PHP backend connection fail"
+      exit 1
+      

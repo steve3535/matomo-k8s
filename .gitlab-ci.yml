@@ -13,6 +13,9 @@ stages:
     - validate-php-conf 
     - deploy-php
     - validate-php 
+    - validate-nginx-conf
+    - deploy-nginx 
+    - validate-nginx 
 
 before_script:
     - |
@@ -39,7 +42,7 @@ deploy-db:
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 
     - kubectl apply -f manifests/db/1-db-matomo-pvc.yaml
     - kubectl apply -f manifests/db/2-db-matomo.yaml 
-    - kubectl wait --for=condition=available deployment/db-matomo -n matomo 
+    - kubectl wait --for=condition=available deployment/db-matomo -n matomo --timeout=1m
     - kubectl apply -f manifests/db/3-db-matomo-svc.yaml  
 
 validate-db-deployment:
@@ -74,7 +77,7 @@ deploy-php:
   script:
     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
     - kubectl apply -f manifests/backend/2-php-deploy.yaml
-    - kubectl wait --for=condition=available deployment/php-matomo -n matomo
+    - kubectl wait --for=condition=available deployment/php-matomo -n matomo --timeout=1m
       
 validate-php-deployment:
   stage: validate-php 
@@ -96,4 +99,29 @@ validate-php-service:
       exit 0
       echo "PHP backend connection fail"
       exit 1
+
+validate-nginx-conf:
+  stage: validate-nginx-conf 
+  script:
+    - kubectl apply -f manifests/frontend/ --dry-run=client 
+  
+deploy-nginx:
+  stage: deploy-nginx 
+  script:
+    - kubectl apply -f manifests/frontend/0-nginx-cm.yaml 
+    - kubectl apply -f manifests/frontend/1-nginx-deploy.yaml 
+    - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
+    - kubectl apply -f manifests/frontend/2-nginx-service.yaml 
+
+validate-nginx-service:
+  stage: validate-nginx 
+  script:
+    - kubectl config set-context --namespace matomo --current
+    # - |
+    #   if kubectl run frontent-test --image=alpine -i --rm --restart=Never -- \
+    #   curl -s --fail http://nginx-matomo:80;then 
+    #   echo 'Nginx connection OK'
+    #   exit 0
+    #   fi
+    #   exit 1
       

@@ -83,6 +83,8 @@ validate-php-deployment:
 
 validate-php-service:
   stage: validate-php 
+  needs:
+    - validate-php-deployment
   script:
     - kubectl config set-context --namespace matomo --current      
     - |

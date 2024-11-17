@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   matomo.conf: |+
     upstream php-handler {
-            server php.matomo.svc.cluster.local:9000;
+            server php-matomo.matomo.svc.cluster.local:9000;
     }
 
     server {

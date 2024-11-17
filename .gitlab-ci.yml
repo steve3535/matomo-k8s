@@ -78,6 +78,7 @@ deploy-php:
     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
     - kubectl apply -f manifests/backend/2-php-deploy.yaml
     - kubectl wait --for=condition=available deployment/php-matomo -n matomo --timeout=1m
+    - kubectl apply -f manifests/backend/3-php-svc.yaml
       
 validate-php-deployment:
   stage: validate-php 

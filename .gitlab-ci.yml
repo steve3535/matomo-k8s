@@ -118,11 +118,12 @@ validate-nginx-service:
   stage: validate-nginx 
   script:
     - kubectl config set-context --namespace matomo --current
-    # - |
-    #   if kubectl run frontent-test --image=alpine -i --rm --restart=Never -- \
-    #   curl -s --fail http://nginx-matomo:80;then 
-    #   echo 'Nginx connection OK'
-    #   exit 0
-    #   fi
-    #   exit 1
+    - |
+      STATUS=$(kubectl run frontent-test-${CI_JOB_ID} --image=curlimages/curl -i --rm --restart=Never -- \
+      curl -s -o /dev/null -w '%{http_code}' http://nginx-matomo/)
+      if [[ $STATUS =~ ^2[0-9][0-9]$ ]];then
+      echo 'Nginx connection OK'
+      exit 0
+      fi
+      exit 1
       

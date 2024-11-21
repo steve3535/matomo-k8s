@@ -1,6 +1,8 @@
 variables:
     MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    INGRESS_IP: 172.23.89.100 
+    INCOMING_URL: stats.lalux.lu
 
 default:
   tags: 
@@ -16,6 +18,8 @@ stages:
     - validate-nginx-conf
     - deploy-nginx 
     - validate-nginx 
+    - validate-ingress
+    
 
 before_script:
     - |
@@ -125,4 +129,29 @@ validate-nginx-service:
       exit 0
       fi
       exit 1
+
+validate-ingress-conf:
+  stage: validate-ingress
+  script: 
+    - kubectl apply -f manifests/ingress/matomo.yaml --dry-run=client 
+
+deploy-ingress:
+  stage: validate-ingress
+  needs: validate-ingress-conf
+  script:
+    - kubectl apply -f manifests/ingress/matomo.yaml
+
+validate-ingress: 
+  stage: validate-ingress
+  needs: deploy-ingress
+  script:
+    - |
+      STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: ${INCOMING_URL}' http://${INGRESS_IP} --noproxy '*')
+      if [[ $STATUS =~ ^2[0-9][0-9] ]];then
+        echo "OK - Reachable via ingressroute"
+        exit 0
+      fi
+      exit 1 
+      
+
       

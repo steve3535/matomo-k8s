@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`matomo.lalux.lu`)    # Just match the hostname
+    - match: Host(`stats.lalux.lu`)    # Just match the hostname
       kind: Rule
       middlewares:
         - name: secure-headers

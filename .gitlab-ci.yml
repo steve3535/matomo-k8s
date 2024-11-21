@@ -9,14 +9,8 @@ default:
     - k8s
 
 stages:
-    - validate-db-conf
-    - deploy-db
     - validate-db
-    - validate-php-conf 
-    - deploy-php
     - validate-php 
-    # - validate-nginx-conf
-    # - deploy-nginx 
     - validate-nginx 
     - validate-ingress
     
@@ -35,12 +29,14 @@ before_script:
       EOF   
 
 validate-db-conf:
-  stage: validate-db-conf 
+  stage: validate-db 
   script:
     - kubectl apply -f manifests/db/ --dry-run=client   
 
 deploy-db:
-  stage: deploy-db
+  stage: validate-db
+  needs:
+    - validate-db-conf
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 
@@ -51,6 +47,8 @@ deploy-db:
 
 validate-db-deployment:
   stage: validate-db
+  needs:
+    - deploy-db
   script:
     - kubectl rollout status deployment db-matomo --timeout=5s
 
@@ -72,12 +70,14 @@ validate-db-service:
         exit 1          
 
 validate-php-conf:
-  stage: validate-php-conf 
+  stage: validate-php   
   script:
     - kubectl apply -f manifests/backend/ --dry-run=client   
 
 deploy-php:
-  stage: deploy-php 
+  stage: validate-php
+  needs:
+    - validate-php-conf 
   script:
     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
     - kubectl apply -f manifests/backend/2-php-deploy.yaml
@@ -86,6 +86,8 @@ deploy-php:
       
 validate-php-deployment:
   stage: validate-php 
+  needs:
+    - deploy-php
   script:
     - kubectl rollout status deployment/php-matomo --timeout=5s 
 

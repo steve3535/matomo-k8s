@@ -112,7 +112,8 @@ validate-nginx-conf:
   
 deploy-nginx:
   stage: validate-nginx 
-  needs: validate-nginx-conf
+  needs: 
+    - validate-nginx-conf
   script:
     - kubectl apply -f manifests/frontend/0-nginx-cm.yaml 
     - kubectl apply -f manifests/frontend/1-nginx-deploy.yaml 
@@ -121,7 +122,8 @@ deploy-nginx:
 
 validate-nginx-service:
   stage: validate-nginx 
-  needs: deploy-nginx 
+  needs: 
+    - deploy-nginx 
   script:
     - kubectl config set-context --namespace matomo --current
     - |

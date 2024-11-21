@@ -15,8 +15,8 @@ stages:
     - validate-php-conf 
     - deploy-php
     - validate-php 
-    - validate-nginx-conf
-    - deploy-nginx 
+    # - validate-nginx-conf
+    # - deploy-nginx 
     - validate-nginx 
     - validate-ingress
     
@@ -106,12 +106,13 @@ validate-php-service:
       exit 1
 
 validate-nginx-conf:
-  stage: validate-nginx-conf 
+  stage: validate-nginx 
   script:
     - kubectl apply -f manifests/frontend/ --dry-run=client 
   
 deploy-nginx:
-  stage: deploy-nginx 
+  stage: validate-nginx 
+  needs: validate-nginx-conf
   script:
     - kubectl apply -f manifests/frontend/0-nginx-cm.yaml 
     - kubectl apply -f manifests/frontend/1-nginx-deploy.yaml 
@@ -120,6 +121,7 @@ deploy-nginx:
 
 validate-nginx-service:
   stage: validate-nginx 
+  needs: deploy-nginx 
   script:
     - kubectl config set-context --namespace matomo --current
     - |

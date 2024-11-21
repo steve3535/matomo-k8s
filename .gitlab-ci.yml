@@ -137,13 +137,15 @@ validate-ingress-conf:
 
 deploy-ingress:
   stage: validate-ingress
-  needs: validate-ingress-conf
+  needs: 
+    - validate-ingress-conf
   script:
     - kubectl apply -f manifests/ingress/matomo.yaml
 
 validate-ingress: 
   stage: validate-ingress
-  needs: deploy-ingress
+  needs: 
+    - deploy-ingress
   script:
     - |
       STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: ${INCOMING_URL}' http://${INGRESS_IP} --noproxy '*')

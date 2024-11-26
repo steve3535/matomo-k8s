@@ -70,7 +70,7 @@ deploy-db:
     - |
       for file in manifests/*/*.yaml;do 
         echo "Processing file $file"
-        sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" $file 
+        sed -i -e "s/namespace: \<matomo\>/namespace: ${NAMESPACE}/g" -e "s/namespace: \<matomo-test\>/namespace: ${NAMESPACE}/g" $file 
       done 
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 

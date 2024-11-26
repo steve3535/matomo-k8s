@@ -5,6 +5,7 @@ metadata:
     app: php-matomo
     tier: backend
   name: php-matomo
+  namespace: matomo
 spec:
   replicas: 1
   selector:

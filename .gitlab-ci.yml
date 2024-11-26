@@ -39,7 +39,8 @@ stages:
     - validate-ingress   
 
 before_script:
-    - echo $NAMESPACE
+    - echo ${NAMESPACE}
+    - echo ${CI_COMMIT_BRANCH}
     - |
       cat <<EOF >manifests/db/0-db-matomo-secrets.yaml 
       apiVersion: v1

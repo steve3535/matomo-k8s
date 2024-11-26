@@ -46,10 +46,16 @@ stages:
 
                                                                             
 validate-db-conf:
-  <<: *env-vars 
   stage: validate-db 
+  script:
+    - kubectl apply -f manifests/db/ --dry-run=client   
+  
+deploy-db:
+  <<: *env-vars
+  stage: validate-db
+  needs:
+    - validate-db-conf
   before_script:
-    - echo ${NAMESPACE}
     - |
       cat <<EOF >manifests/db/0-db-matomo-secrets.yaml 
       apiVersion: v1
@@ -60,29 +66,12 @@ validate-db-conf:
       data:
           mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
-      EOF   
+      EOF       
     - |
-      # For debugging, let's see what files we have
-      echo "Files found:"
-      for file in manifests/*/*.yaml; do
-        echo "Processing $file"
-        echo "Before:"
-        cat $file
-        sed -i "s/namespace: matomo/namespace: ${NAMESPACE}/g" $file
-        echo "After:"
-        cat $file
-        echo "-------------------"
-      done    
-
-  script:
-    - cat manifests/db/1-db-matomo-pvc.yaml
-    - kubectl apply -f manifests/db/ --dry-run=client   
-  
-deploy-db:
-  <<: *env-vars
-  stage: validate-db
-  needs:
-    - validate-db-conf
+      for file in manifests/*/*.yaml;do 
+        echo "Processing file $file"
+        sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" $file 
+      done 
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 

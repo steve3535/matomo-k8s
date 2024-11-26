@@ -52,6 +52,10 @@ validate-db-conf:
 deploy-db:
   <<: *env-vars
   stage: validate-db
+  artifacts:
+    paths:
+      - manifests 
+    expire_in: 1 hour 
   needs:
     - validate-db-conf
   before_script:

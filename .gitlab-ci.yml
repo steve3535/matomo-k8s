@@ -64,7 +64,7 @@ validate-db-conf:
     - |
       # For debugging, let's see what files we have
       echo "Files found:"
-      for file in manifests/db/*.{yaml,yml}; do
+      for file in manifests/*/*.{yaml,yml}; do
         echo "Processing $file"
         echo "Before:"
         cat $file

@@ -63,7 +63,7 @@ validate-db-conf:
       EOF   
     - |
       export NS=${NAMESPACE}
-      find manifests -type f -name "*.yaml" -o -name "*.yml"     
+      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec sed -v "s/namespace: matomo/namespace: $NS/g" {} +    
 
   script:
     - cat manifests/db/1-db-matomo-pvc.yaml

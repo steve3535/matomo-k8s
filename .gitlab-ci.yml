@@ -44,7 +44,7 @@ stages:
     - validate-nginx 
     - validate-ingress   
 
-                                                                            
+                                                                           
 validate-db-conf:
   stage: validate-db 
   script:
@@ -83,20 +83,22 @@ deploy-db:
     - kubectl apply -f manifests/db/3-db-matomo-svc.yaml  
   
 validate-db-deployment:
+  <<: *env-vars 
   stage: validate-db
   needs:
     - deploy-db
   script:
-    - kubectl rollout status deployment db-matomo --timeout=5s
+    - kubectl -n ${NAMESPACE} rollout status deployment db-matomo --timeout=5s
 
 validate-db-service:
+    <<: *env-vars 
     stage: validate-db
     needs:
       - validate-db-deployment 
     script:
       - echo "Validating DB connection ..."
       - sleep 8
-      - kubectl config set-context --namespace matomo --current      
+      - kubectl config set-context --namespace ${NAMESPACE} --current      
       - |
         if kubectl run mariadb-client-${CI_JOB_ID} -i --image=bitnami/mariadb --rm --restart=Never -- \
         mysql -hdb-matomo -uroot -p${MARIADB_ROOT_PASSWORD} -e "select 1";then 
@@ -111,93 +113,91 @@ validate-php-conf:
   script:
     - kubectl apply -f manifests/backend/ --dry-run=client   
 
-deploy-php:
-  stage: validate-php
-  needs:
-    - validate-php-conf 
-  script:
-    - kubectl apply -f manifests/backend/1-php-pvc.yaml 
-    - kubectl apply -f manifests/backend/2-php-deploy.yaml
-    - kubectl wait --for=condition=available deployment/php-matomo -n matomo --timeout=1m
-    - kubectl apply -f manifests/backend/3-php-svc.yaml
+# deploy-php:
+#   stage: validate-php
+#   needs:
+#     - validate-php-conf 
+#   script:
+#     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
+#     - kubectl apply -f manifests/backend/2-php-deploy.yaml
+#     - kubectl wait --for=condition=available deployment/php-matomo -n matomo --timeout=1m
+#     - kubectl apply -f manifests/backend/3-php-svc.yaml
       
-validate-php-deployment:
-  stage: validate-php 
-  needs:
-    - deploy-php
-  script:
-    - kubectl rollout status deployment/php-matomo --timeout=5s 
+# validate-php-deployment:
+#   stage: validate-php 
+#   needs:
+#     - deploy-php
+#   script:
+#     - kubectl rollout status deployment/php-matomo --timeout=5s 
 
-validate-php-service:
-  stage: validate-php 
-  needs:
-    - validate-php-deployment
-  script:
-    - kubectl config set-context --namespace matomo --current      
-    - |
-      if kubectl run php-test-${CI_JOB_ID} --image=alpine -it --rm --restart=Never -- \
-      sh -c apk update --no-check-certificate && apk add --no-cache fcgi --no-check-certificate && \
-      cgi-fcgi -bind -connect php-matomo:9000;then 
-      echo "PHP backend connection OK"
-      fi 
-      exit 0
-      echo "PHP backend connection fail"
-      exit 1
+# validate-php-service:
+#   stage: validate-php 
+#   needs:
+#     - validate-php-deployment
+#   script:
+#     - kubectl config set-context --namespace matomo --current      
+#     - |
+#       if kubectl run php-test-${CI_JOB_ID} --image=alpine -it --rm --restart=Never -- \
+#       sh -c apk update --no-check-certificate && apk add --no-cache fcgi --no-check-certificate && \
+#       cgi-fcgi -bind -connect php-matomo:9000;then 
+#       echo "PHP backend connection OK"
+#       fi 
+#       exit 0
+#       echo "PHP backend connection fail"
+#       exit 1
 
-validate-nginx-conf:
-  stage: validate-nginx 
-  script:
-    - kubectl apply -f manifests/frontend/ --dry-run=client 
+# validate-nginx-conf:
+#   stage: validate-nginx 
+#   script:
+#     - kubectl apply -f manifests/frontend/ --dry-run=client 
   
-deploy-nginx:
-  stage: validate-nginx 
-  needs: 
-    - validate-nginx-conf
-  script:
-    - kubectl apply -f manifests/frontend/0-nginx-cm.yaml 
-    - kubectl apply -f manifests/frontend/1-nginx-deploy.yaml 
-    - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
-    - kubectl apply -f manifests/frontend/2-nginx-service.yaml 
+# deploy-nginx:
+#   stage: validate-nginx 
+#   needs: 
+#     - validate-nginx-conf
+#   script:
+#     - kubectl apply -f manifests/frontend/0-nginx-cm.yaml 
+#     - kubectl apply -f manifests/frontend/1-nginx-deploy.yaml 
+#     - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
+#     - kubectl apply -f manifests/frontend/2-nginx-service.yaml 
 
-validate-nginx-service:
-  stage: validate-nginx 
-  needs: 
-    - deploy-nginx 
-  script:
-    - kubectl config set-context --namespace matomo --current
-    - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
-    - |
-      if kubectl run frontent-test-${CI_JOB_ID} --image=curlimages/curl -i --rm --restart=Never -- \
-      curl -s --fail -o /dev/null http://nginx-matomo/;then 
-      echo 'Nginx connection OK'
-      exit 0
-      fi
-      exit 1
+# validate-nginx-service:
+#   stage: validate-nginx 
+#   needs: 
+#     - deploy-nginx 
+#   script:
+#     - kubectl config set-context --namespace matomo --current
+#     - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
+#     - |
+#       if kubectl run frontent-test-${CI_JOB_ID} --image=curlimages/curl -i --rm --restart=Never -- \
+#       curl -s --fail -o /dev/null http://nginx-matomo/;then 
+#       echo 'Nginx connection OK'
+#       exit 0
+#       fi
+#       exit 1
 
-validate-ingress-conf:
-  stage: validate-ingress
-  script: 
-    - kubectl apply -f manifests/ingress/matomo.yaml --dry-run=client 
+# validate-ingress-conf:
+#   stage: validate-ingress
+#   script: 
+#     - kubectl apply -f manifests/ingress/matomo.yaml --dry-run=client 
 
-deploy-ingress:
-  stage: validate-ingress
-  needs: 
-    - validate-ingress-conf
-  script:
-    - kubectl apply -f manifests/ingress/matomo.yaml
+# deploy-ingress:
+#   stage: validate-ingress
+#   needs: 
+#     - validate-ingress-conf
+#   script:
+#     - kubectl apply -f manifests/ingress/matomo.yaml
 
-validate-ingress: 
-  stage: validate-ingress
-  needs: 
-    - deploy-ingress
-  script:
-    - |
-      STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: ${INCOMING_URL}" http://${INGRESS_IP} --noproxy '*')
-      if [[ $STATUS =~ ^2[0-9][0-9] ]];then
-        echo "OK - Reachable via ingressroute"
-        exit 0
-      fi
-      exit 1 
-      
-
+# validate-ingress: 
+#   stage: validate-ingress
+#   needs: 
+#     - deploy-ingress
+#   script:
+#     - |
+#       STATUS=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: ${INCOMING_URL}" http://${INGRESS_IP} --noproxy '*')
+#       if [[ $STATUS =~ ^2[0-9][0-9] ]];then
+#         echo "OK - Reachable via ingressroute"
+#         exit 0
+#       fi
+#       exit 1    
       

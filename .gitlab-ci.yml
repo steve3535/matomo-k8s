@@ -78,6 +78,9 @@ deploy-php:
   stage: validate-php
   needs:
     - validate-php-conf 
+    - deploy-db 
+  dependencies:
+    - deploy-db
   script:
     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
     - kubectl apply -f manifests/backend/2-php-deploy.yaml

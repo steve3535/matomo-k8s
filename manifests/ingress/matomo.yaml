@@ -7,11 +7,22 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`stats.lalux.lu`)    # Just match the hostname
+    - match: Host(`stats.lalux.lu`) && PathPrefix('/test')   # Just match the hostname
       kind: Rule
       middlewares:
         - name: secure-headers
+        - name: strip-test-prefix
       services:
         - name: nginx-matomo
           port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: matomo
+  namespace: matomo
+spec:
+  stripPrefix:
+    prefixes:
+      - /test 
 

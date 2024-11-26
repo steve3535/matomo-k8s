@@ -6,8 +6,8 @@ variables:
     TEST_URL: stats.lalux.lu/test
     PROD_NAMESPACE: matomo 
     TEST_NAMESPACE: matomo-test
-    NAMESPACE: ${$CI_COMMIT_BRANCH == "main" && ${PROD_NAMESPACE} || ${TEST_NAMESPACE}}
-    INCOMING_URL: ${$CI_COMMIT_BRANCH == "main" && ${PROD_URL} || ${TEST_URL}}
+    # NAMESPACE: ${$CI_COMMIT_BRANCH == "main" && ${PROD_NAMESPACE} || ${TEST_NAMESPACE}}
+    # INCOMING_URL: ${$CI_COMMIT_BRANCH == "main" && ${PROD_URL} || ${TEST_URL}}
 
 # .env-prod: &env-prod 
 #   variables:

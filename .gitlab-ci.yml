@@ -2,7 +2,31 @@ variables:
     MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     INGRESS_IP: 172.23.89.100 
-    INCOMING_URL: stats.lalux.lu
+    PROD_URL: stats.lalux.lu
+    TEST_URL: stats.lalux.lu/test
+    PROD_NAMESPACE: matomo 
+    TEST_NAMESPACE: matomo-test
+
+# .env-prod: &env-prod 
+#   variables:
+#     NAMESPACE: ${PROD_NAMESPACE}
+#     INCOMING_URL: ${PROD_URL} 
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "main"
+
+# .env-test: &env-test
+#   variables: 
+#     NAMESPACE: ${TEST_NAMESPACE}
+#     INCOMING_URL: ${TEST_URL}
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == "test"
+
+.env-vars: &env-vars
+  variables:
+    NAMESPACE: ${$CI_COMMIT_BRANCH == "main" && ${PROD_NAMESPACE} || ${TEST_NAMESPACE}}
+    INCOMING_URL: ${$CI_COMMIT_BRANCH == "main" && ${PROD_URL} || ${TEST_URL}}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "test"
 
 default:
   tags: 
@@ -12,8 +36,7 @@ stages:
     - validate-db
     - validate-php 
     - validate-nginx 
-    - validate-ingress
-    
+    - validate-ingress   
 
 before_script:
     - |
@@ -22,18 +45,22 @@ before_script:
       kind: Secret
       metadata:  
         name: db-matomo-secrets
-        namespace: matomo 
+        namespace: ${NAMESPACE} 
       data:
           mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
-
+    - # replace all namespaces occurrences with the right one  
+    - | 
+      find manifests -type f \(-name "*.yaml" -o -name "*.yml" \) -exec sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {}+
+                                                                              
 validate-db-conf:
   stage: validate-db 
   script:
     - kubectl apply -f manifests/db/ --dry-run=client   
-
+  
 deploy-db:
+  <<: *env-vars
   stage: validate-db
   needs:
     - validate-db-conf
@@ -42,9 +69,9 @@ deploy-db:
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 
     - kubectl apply -f manifests/db/1-db-matomo-pvc.yaml
     - kubectl apply -f manifests/db/2-db-matomo.yaml 
-    - kubectl wait --for=condition=available deployment/db-matomo -n matomo --timeout=1m
+    - kubectl wait --for=condition=available deployment/db-matomo -n ${NAMESPACE} --timeout=1m
     - kubectl apply -f manifests/db/3-db-matomo-svc.yaml  
-
+  
 validate-db-deployment:
   stage: validate-db
   needs:

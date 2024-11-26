@@ -62,8 +62,8 @@ validate-db-conf:
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
     - |
-      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec \
-      sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {} +    
+      export NS=${NAMESPACE}
+      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec sed -i -e "s/namespace: matomo/namespace: $NS/g" {} +    
 
   script:
     - cat manifests/db/1-db-matomo-pvc.yaml

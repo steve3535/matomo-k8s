@@ -51,7 +51,7 @@ before_script:
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
     - | 
-      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {}+
+      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {} +
                                                                               
 validate-db-conf:
   stage: validate-db 

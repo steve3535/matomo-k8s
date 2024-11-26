@@ -75,3 +75,4 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: nginx-matomo-config
+  namespace: matomo

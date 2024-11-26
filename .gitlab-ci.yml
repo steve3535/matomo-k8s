@@ -68,9 +68,11 @@ deploy-db:
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF       
     - |
-      for file in manifests/*/*.yaml;do 
-        echo "Processing file $file"
-        sed -i -e "s/namespace: \<matomo\>/namespace: ${NAMESPACE}/g" -e "s/namespace: \<matomo-test\>/namespace: ${NAMESPACE}/g" $file 
+      for file in manifests/*/*.yaml;do
+        if [ "$file" != "manifests/db/0-db-matomo-secrets.yaml" ];then  
+          echo "Processing file $file"
+          sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" $file 
+        fi
       done 
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 

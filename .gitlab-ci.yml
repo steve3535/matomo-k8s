@@ -22,11 +22,15 @@ variables:
 #     - if: $CI_COMMIT_BRANCH == "test"
 
 .env-vars: &env-vars
-  variables:
-    NAMESPACE: ${$CI_COMMIT_BRANCH == "main" && ${PROD_NAMESPACE} || ${TEST_NAMESPACE}}
-    INCOMING_URL: ${$CI_COMMIT_BRANCH == "main" && ${PROD_URL} || ${TEST_URL}}
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "main" 
+      variables:
+        NAMESPACE: ${PROD_NAMESPACE}
+        INCOMING_URL: ${PROD_URL}
+    - if: $CI_COMMIT_BRANCH == "test"
+      variables:
+        NAMESPACE: ${TEST_NAMESPACE}
+        INCOMING_URL: ${TEST_URL}
 
 default:
   tags: 

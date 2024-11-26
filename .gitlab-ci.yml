@@ -6,6 +6,8 @@ variables:
     TEST_URL: stats.lalux.lu/test
     PROD_NAMESPACE: matomo 
     TEST_NAMESPACE: matomo-test
+    NAMESPACE: ${$CI_COMMIT_BRANCH == "main" && ${PROD_NAMESPACE} || ${TEST_NAMESPACE}}
+    INCOMING_URL: ${$CI_COMMIT_BRANCH == "main" && ${PROD_URL} || ${TEST_URL}}
 
 # .env-prod: &env-prod 
 #   variables:
@@ -44,7 +46,6 @@ stages:
 
 before_script:
     - echo ${NAMESPACE}
-    - echo ${CI_COMMIT_BRANCH}
     - |
       cat <<EOF >manifests/db/0-db-matomo-secrets.yaml 
       apiVersion: v1
@@ -57,7 +58,10 @@ before_script:
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
     - | 
-      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {} +
+      find manifests -type f -name "*.yaml" -o -name "*.yml" -exec \
+                             sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {} +    
+
+
                                                                               
 validate-db-conf:
   stage: validate-db 

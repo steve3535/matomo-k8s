@@ -128,6 +128,7 @@ validate-nginx-service:
     - deploy-nginx 
   script:
     - kubectl config set-context --namespace matomo --current
+    - kubectl -n matomo wait --for=condition=available deployment/nginx-matomo --timeout=1m
     - |
       if kubectl run frontent-test-${CI_JOB_ID} --image=curlimages/curl -i --rm --restart=Never -- \
       curl -s --fail -o /dev/null http://nginx-matomo/;then 

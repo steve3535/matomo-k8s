@@ -50,7 +50,6 @@ before_script:
           mariadb-password: $(echo -n "$MARIADB_PASSWORD" | base64)
           mariadb-root-password: $(echo -n "$MARIADB_ROOT_PASSWORD" | base64)
       EOF   
-    - # replace all namespaces occurrences with the right one  
     - | 
       find manifests -type f \(-name "*.yaml" -o -name "*.yml" \) -exec sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {}+
                                                                               

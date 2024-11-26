@@ -38,13 +38,17 @@ default:
   tags: 
     - k8s
 
-stages:
+stages:    
     - validate-db
     - validate-php 
     - validate-nginx 
     - validate-ingress   
 
-before_script:
+                                                                            
+validate-db-conf:
+  <<: *env-vars 
+  stage: validate-db 
+  before_script:
     - echo ${NAMESPACE}
     - |
       cat <<EOF >manifests/db/0-db-matomo-secrets.yaml 
@@ -61,10 +65,6 @@ before_script:
       find manifests -type f -name "*.yaml" -o -name "*.yml" -exec \
                              sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" {} +    
 
-
-                                                                              
-validate-db-conf:
-  stage: validate-db 
   script:
     - cat manifests/db/1-db-matomo-pvc.yaml
     - kubectl apply -f manifests/db/ --dry-run=client   

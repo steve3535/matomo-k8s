@@ -73,6 +73,7 @@ deploy-db:
           sed -i -e "s/namespace: matomo/namespace: ${NAMESPACE}/g" -e "s/namespace: matomo-test/namespace: ${NAMESPACE}/g" $file 
         fi
       done 
+    - cat manifests/backend/1-php-pvc.yaml  
   script:
     - kubectl apply -f manifests/db/0-db-matomo-envs.yaml 
     - kubectl apply -f manifests/db/0-db-matomo-secrets.yaml 

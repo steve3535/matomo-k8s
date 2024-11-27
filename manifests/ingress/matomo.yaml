@@ -2,7 +2,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: matomo
-  namespace: matomo
+  namespace: matomo-test
 spec:
   entryPoints:
     - web
@@ -20,7 +20,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: matomo
-  namespace: matomo
+  namespace: matomo-test
 spec:
   stripPrefix:
     prefixes:

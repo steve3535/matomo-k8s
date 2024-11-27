@@ -201,6 +201,7 @@ deploy-ingress:
   needs: 
     - validate-ingress-conf
   script:
+    - cat manifests/ingress/matomo.yaml
     - kubectl apply -f manifests/ingress/matomo.yaml
 
 validate-ingress: 

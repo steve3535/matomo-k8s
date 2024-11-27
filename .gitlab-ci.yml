@@ -200,9 +200,6 @@ deploy-ingress:
   stage: validate-ingress
   needs: 
     - validate-ingress-conf
-    - deploy-db 
-  dependencies:
-    - deploy-db 
   script:
     - kubectl apply -f manifests/ingress/matomo.yaml
 

@@ -1143,6 +1143,8 @@ type = BASIC ; proxy type for outbound/outgoing connections; currently, only BAS
 host = proxy.lalux.local; Proxy host: the host name of your proxy server (mandatory)
 port = 3128; Proxy port: the port that the proxy server listens to. There is no standard default, but 80, 1080, 3128, and 8080 are popular
 exclude = lalux.local; Comma separated list of hosts to exclude from proxy: optional; localhost is always excluded
+username = ;
+password = ;
 
 [Languages]
 Languages[] = am

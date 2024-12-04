@@ -43,7 +43,7 @@ spec:
           persistentVolumeClaim:
             claimName: pvc-matomo-php-logs
 
-        - name: php-config
+        - name: php-matomo-config
           configMap:
             name: php-matomo-config            
 

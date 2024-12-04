@@ -79,6 +79,7 @@ deploy-php:
   needs:
     - validate-php-conf 
   script:
+    - kubectl apply -f manifests/backend/0-php-matomo-config.yaml
     - kubectl apply -f manifests/backend/1-php-pvc.yaml 
     - kubectl apply -f manifests/backend/2-php-deploy.yaml
     - kubectl wait --for=condition=available deployment/php-matomo -n matomo --timeout=1m
